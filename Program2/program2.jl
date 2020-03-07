@@ -26,7 +26,7 @@ mutable struct PlayerStruct
     battingAvg::Float64
     slugging::Float64
     onBasePercent::Float64
-    teamSize::Int32
+    numberOfPlayers::Int32
 end
 
 #****************
@@ -78,7 +78,7 @@ end
 
 function printReport(playerReport::PlayerStruct)
     # Print team report
-    println("BASEBALL TEAM REPORT --- " * string(playerReport.teamSize) * " players FOUND IN FILE")
+    println("BASEBALL TEAM REPORT --- " * string(playerReport.numberOfPlayers) * " players FOUND IN FILE")
 
     # Print overall batting average
     #@printf "OVERALL BATTING AVERAGE is %1.3f" playerReport.teamAverage
@@ -148,10 +148,10 @@ count = 0
         battingaverage = 0.0
         slug = 0.0
         onbase = 0.0
-        teamsize = 0
+        playernum = count
 
         #  Add new player to
-        player = PlayerStruct(firstname, lastname, atbats, plateapp, singles, doubles, triples, homeruns, walks, hitbypitch, battingaverage, slug, onbase, 0)
+        player = PlayerStruct(firstname, lastname, atbats, plateapp, singles, doubles, triples, homeruns, walks, hitbypitch, battingaverage, slug, onbase, playernum)
         playerReport.teamSize = count
         push!(playerReport.team, player)
     end
@@ -172,14 +172,14 @@ end
 #end
 
 # Testing
-#println(playerReport.team[1].homeRuns)
-#print("Name: ", playerReport.team[1].firstName)
-#println(playerReport.team[1].lastName)
-#println("At bats: ", playerReport.team[1].atBats)
-#println("Plate App: ", playerReport.team[1].plateApp)
-#println("Singles: ", playerReport.team[1].singles)
-#println("Doubles: ", playerReport.team[1].doubles)
-#println("Batting Avg" , playerReport.team[1].battingAvg)
-#println("Slugging: ", playerReport.team[1].slugging)
-#println("On Base: ", playerReport.team[1].onBasePercent)
-#println("Team Average: ", playerReport.average)
+println(playerReport.team[1].homeRuns)
+print("Name: ", playerReport.team[1].firstName)
+println(playerReport.team[1].lastName)
+println("At bats: ", playerReport.team[1].atBats)
+println("Plate App: ", playerReport.team[1].plateApp)
+println("Singles: ", playerReport.team[1].singles)
+println("Doubles: ", playerReport.team[1].doubles)
+println("Batting Avg" , playerReport.team[1].battingAvg)
+println("Slugging: ", playerReport.team[1].slugging)
+println("On Base: ", playerReport.team[1].onBasePercent)
+println("Team Average: ", playerReport.average)
