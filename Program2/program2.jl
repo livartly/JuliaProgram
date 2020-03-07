@@ -15,6 +15,7 @@ struct Player
     homeRuns::UInt64
     walks::UInt64
     hitPitch::UInt64
+    battingAvg::Float64
 end
 
 #****************
@@ -33,6 +34,11 @@ end
 fileData = String[]
 playerData = String[]
 playerReport = formattedP("", "", 0.0, 0.0, 0.0, Vector{Player}[])
+
+#prompting user for file name
+println("Please enter the name of your player data file: ")
+playerFile = chomp(readline())
+println()
 
 #open file
 open("julia.txt","r") do file
@@ -54,10 +60,11 @@ count = 0
         triples = parse(Int32, playerData[7])
         homeruns = parse(Int32, playerData[8])
         walks = parse(Int32, playerData[9])
-        hitbypitch = parse(Int32, playerData[10])
+        hitbypitch = parse(Int32, playerData[10]
+        battingaverage = 0.0
 
         #add new player to
-        player = Player(firstname, lastname, atbats, plateapp, singles, doubles, triples, homeruns, walks, hitbypitch)
+        player = Player(firstname, lastname, atbats, plateapp, singles, doubles, triples, homeruns, walks, hitbypitch, battingaverage)
         push!(playerReport.team, player)
     end
 end
@@ -65,10 +72,8 @@ end
 println(playerReport.team[1].homeRuns)
 
 #TODO: write sorting function
-#TODO: write various player statistics calculation
-#TODO: calculate player averages
-#TODO: write function to return the path of the input file
-#TODO: write function to read in input file
-#TODO: write function to parse data file line by line
 #TODO: write function to format final player report
-#TODO: write main driver function
+#TODO: Compute batting avg- sum of singles, doubles, triples, +home runs
+#TODO: Compute slugging percentage- check sheet for formula
+#TODO: Compute on base percentage- sum of walks, hitPitch divided by plate plateAppearances
+#TODO: Compute overall batting avg
