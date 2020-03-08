@@ -1,13 +1,12 @@
 using Printf
 using Statistics
 
-#TODO: write sorting function
-#TODO: write function to FormatPlayer final player report
 #TODO: Compute batting avg- sum of singles, doubles, triples, +home runs
 #TODO: Compute slugging percentage- check sheet for formula
 #TODO: Compute on base percentage- sum of walks, hitPitch divided by plate plateAppearances
 #TODO: Compute overall batting avg
-#TODO: Lots of error checking!
+#TODO: Check for incorrect player data field size
+#TODO: Check for incorrect player numerical data
 
 #****************
 # Structure/Object to hold player data
@@ -26,7 +25,6 @@ mutable struct PlayerStruct
     battingAvg::Float64
     slugging::Float64
     onBasePercent::Float64
-    numberOfPlayers::Int32
 end
 
 #****************
@@ -36,7 +34,6 @@ mutable struct FormatPlayer
     firstName::String
     lastName::String
     average::Float64
-    onBasePercent::Float64
     team::Vector{PlayerStruct}
     teamSize::Int32
 end
@@ -76,12 +73,12 @@ function Base.isless(i::PlayerStruct, j::PlayerStruct)
     return false
 end
 
-function printReport(playerReport::PlayerStruct)
-    # Print team report
-    println("BASEBALL TEAM REPORT --- " * string(playerReport.numberOfPlayers) * " players FOUND IN FILE")
+# Print team report
+function reportPrint(playerReport::FormatPlayer)
+    println("BASEBALL TEAM REPORT --- " * string(playerReport.teamSize) * " players FOUND IN FILE")
 
     # Print overall batting average
-    #@printf "OVERALL BATTING AVERAGE is %1.3f" playerReport.teamAverage
+    @printf "OVERALL BATTING AVERAGE is %1.3f" playerReport.average
     println()
     println()
 
@@ -92,39 +89,40 @@ function printReport(playerReport::PlayerStruct)
     println((" " ^ (12 - length("ONBASE%"))) * "ONBASE%")
     println("---------------------------------------------------------------")
 
-    #printing out player data using the printPlayer function
-    for i in 1:playerReport.teamSize
-        printPlayer(playerReport.team[i])
-    end
+    # Printing out player data using the printPlayer function
+    playerPrint(playerReport)
 
     #TODO: print out errors and error headers
 end
 
-#formats the player data
-function printPlayer(player::PlayerStruct)
-    print((" " ^ (25 - length(player.lastName * ", " * player.firstName * " :"))) * player.lastName * ", " * player.firstName * " :")
-    print(" " ^ (12 - length(@sprintf "%1.3f" player.average)) * (@sprintf "%1.3f" player.average))
-    print(" " ^ (12 - length(@sprintf "%1.3f" player.slug)) * (@sprintf "%1.3f" player.slug))
-    print(" " ^ (12 - length(@sprintf "%1.3f" player.onBasePercent)) * (@sprintf "%1.3f" player.onBasePercent))
+# Format the player data
+function playerPrint(playerReport::FormatPlayer)
+    for i in 1:playerReport.teamSize
+        print((" " ^ (25 - length(playerReport.team[i].firstName * ", " * playerReport.team[i].lastName * " :"))) * playerReport.team[i].firstName * ", " * playerReport.team[i].lastName * " :")
+        print(" " ^ (12 - length(@sprintf "%1.3f" playerReport.team[i].battingAvg)) * (@sprintf "%1.3f" playerReport.team[i].battingAvg))
+        print(" " ^ (12 - length(@sprintf "%1.3f" playerReport.team[i].slugging)) * (@sprintf "%1.3f" playerReport.team[i].slugging))
+        print(" " ^ (12 - length(@sprintf "%1.3f" playerReport.team[i].onBasePercent)) * (@sprintf "%1.3f" playerReport.team[i].onBasePercent))
+        println(" ")
+    end
 end
 
-#Main
+# Begin Main
 
-#printing the welcome message
+# Print the welcome message
 println("Welcome to the player statistics calculator test program! I am going to read team from an input data file, and you will tell me the name of your input file.")
 println("I will store all of the team in a list, compute each player's averages and then write the resulting team report to your output file.")
 
-#create data arrays
+# Create data arrays
 fileData = String[]
 playerData = String[]
-playerReport = FormatPlayer("", "", 0.0, 0.0, Vector{PlayerStruct}[], 0)
+playerReport = FormatPlayer("", "", 0.0, Vector{PlayerStruct}[], 0)
 
-#prompting user for file name
+# Prompt user for file name
 println("Please enter the name of your player data file: ")
 playerFile = chomp(readline())
 println()
 
-#open file
+# Open file
 open("julia.txt","r") do file
 count = 0
     for line in eachline(file)
@@ -132,7 +130,7 @@ count = 0
         count += 1
     end
 
-    #parse individual player data from fileData array
+    # Parse individual player data from fileData array
     for i in 1:count
         playerData = split(fileData[i])
         firstname = playerData[1]
@@ -148,38 +146,24 @@ count = 0
         battingaverage = 0.0
         slug = 0.0
         onbase = 0.0
-        playernum = count
 
-        #  Add new player to
-        player = PlayerStruct(firstname, lastname, atbats, plateapp, singles, doubles, triples, homeruns, walks, hitbypitch, battingaverage, slug, onbase, playernum)
+        # Add new player to team
+        player = PlayerStruct(firstname, lastname, plateapp, atbats, singles, doubles, triples, homeruns, walks, hitbypitch, battingaverage, slug, onbase)
         playerReport.teamSize = count
+        playerReport.firstName = firstname
+        playerReport.lastName = lastname
         push!(playerReport.team, player)
     end
 end
 
-# Print report
+# Calculate player statistics
 for i in 1:playerReport.teamSize
-    printReport(playerReport.team[i])
+    playerBattingAverage(playerReport.team[i])
+    playerSlugging(playerReport.team[i])
+    playerOnBase(playerReport.team[i])
 end
 
-# Calculate player statistics
-    #println("Team size ", playerReport.teamSize)
-    #println("Function call:")
-    #playerBattingAverage(playerReport.team[1])
-    #playerSlugging(playerReport.team[1])
-    #playerOnBase(playerReport.team[1])
-    #teamBattingAverage(playerReport)
-#end
+teamBattingAverage(playerReport)
 
-# Testing
-println(playerReport.team[1].homeRuns)
-print("Name: ", playerReport.team[1].firstName)
-println(playerReport.team[1].lastName)
-println("At bats: ", playerReport.team[1].atBats)
-println("Plate App: ", playerReport.team[1].plateApp)
-println("Singles: ", playerReport.team[1].singles)
-println("Doubles: ", playerReport.team[1].doubles)
-println("Batting Avg" , playerReport.team[1].battingAvg)
-println("Slugging: ", playerReport.team[1].slugging)
-println("On Base: ", playerReport.team[1].onBasePercent)
-println("Team Average: ", playerReport.average)
+# Print report of player data
+reportPrint(playerReport)
