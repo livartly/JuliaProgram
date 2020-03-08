@@ -12,30 +12,30 @@ using Statistics
 # Structure/Object to hold player data
 #****************
 mutable struct PlayerStruct
-    firstName::String
-    lastName::String
-    atBats::UInt64
-    plateApp::UInt64
-    singles::UInt64
-    doubles::UInt64
-    triples::UInt64
-    homeRuns::UInt64
-    walks::UInt64
-    hitPitch::UInt64
-    battingAvg::Float64
-    slugging::Float64
-    onBasePercent::Float64
+    firstName::String           # player's first name
+    lastName::String            # player's last name
+    atBats::UInt64              # player's number of at bats
+    plateApp::UInt64            # player's number of plate apperarances
+    singles::UInt64             # player's number of singles
+    doubles::UInt64             # player's number of doubles
+    triples::UInt64             # player's number of triples
+    homeRuns::UInt64            # player's number of homeruns
+    walks::UInt64               # player's number of walks
+    hitPitch::UInt64            # player's number of hit by pitches
+    battingAvg::Float64         # player's batting average
+    slugging::Float64           # player's slugging
+    onBasePercent::Float64      # player's on base percentage
 end
 
 #****************
 # Structure/object to hold FormatPlayerted player data
 #****************
 mutable struct FormatPlayer
-    firstName::String
-    lastName::String
-    average::Float64
-    team::Vector{PlayerStruct}
-    teamSize::Int32
+    average::Float64                # team's batting average
+    team::Vector{PlayerStruct}      # vector holding team players
+    teamSize::Int32                 # number of players in team
+    errorNum::Int32                 # number of errors found in file
+    errorCollection::Vector{String} # contains type and line of error in input file
 end
 
 # Compute individual player batting averages
@@ -71,6 +71,10 @@ function Base.isless(i::PlayerStruct, j::PlayerStruct)
         return true
     end
     return false
+end
+
+function errorPrint(format::FormatPlayer)
+    println("----- " * string(format.errorNum) * " ERROR LINES FOUND IN INPUT DATA-----")
 end
 
 # Print team report
@@ -115,7 +119,7 @@ println("I will store all of the team in a list, compute each player's averages 
 # Create data arrays
 fileData = String[]
 playerData = String[]
-playerReport = FormatPlayer("", "", 0.0, Vector{PlayerStruct}[], 0)
+playerReport = FormatPlayer(0.0, Vector{PlayerStruct}[], 0, 0, Vector{String}[])
 
 # Prompt user for file name
 println("Please enter the name of your player data file: ")
@@ -133,28 +137,45 @@ count = 0
     # Parse individual player data from fileData array
     for i in 1:count
         playerData = split(fileData[i])
+
+        # Error checking for input file fields
+            if length(playerData) != 10
+                push!(playerReport.errorCollection, "line " * string(i) * ": Line contains not enough data.")
+                playerReport.errorNum += 1
+                continue
+            end
+
+        # Create new player with player data
         firstname = playerData[1]
         lastname = playerData[2]
-        atbats = parse(Int32, playerData[3])
-        plateapp = parse(Int32, playerData[4])
-        singles = parse(Int32, playerData[5])
-        doubles = parse(Int32, playerData[6])
-        triples = parse(Int32, playerData[7])
-        homeruns = parse(Int32, playerData[8])
-        walks = parse(Int32, playerData[9])
-        hitbypitch = parse(Int32, playerData[10])
-        battingaverage = 0.0
-        slug = 0.0
-        onbase = 0.0
+
+        # Error checking for invalid data entries before assignment
+        #try
+            atbats = parse(Int32, playerData[3])
+            plateapp = parse(Int32, playerData[4])
+            singles = parse(Int32, playerData[5])
+            doubles = parse(Int32, playerData[6])
+            triples = parse(Int32, playerData[7])
+            homeruns = parse(Int32, playerData[8])
+            walks = parse(Int32, playerData[9])
+            hitbypitch = parse(Int32, playerData[10])
+
+            battingaverage = 0.0
+            slug = 0.0
+            onbase = 0.0
+        # Append error to error collection
+        #catch err
+        #    push!(playerReport.errorCollection, "line  " * string(i) * ": Line contains invalid numeric data.")
+        #    playerReport.errorNum += 1
+        #    continue
+        #end
 
         # Add new player to team
         player = PlayerStruct(firstname, lastname, plateapp, atbats, singles, doubles, triples, homeruns, walks, hitbypitch, battingaverage, slug, onbase)
         playerReport.teamSize = count
-        playerReport.firstName = firstname
-        playerReport.lastName = lastname
         push!(playerReport.team, player)
     end
-end
+end # End open
 
 # Calculate player statistics
 for i in 1:playerReport.teamSize
@@ -167,3 +188,4 @@ teamBattingAverage(playerReport)
 
 # Print report of player data
 reportPrint(playerReport)
+errorPrint(playerReport)
